@@ -1,6 +1,5 @@
 from django.db import models
 
-
 class Condominio(models.Model):
     nome = models.CharField(max_length=100)
     endereco = models.CharField(max_length=255, blank=True)
@@ -13,6 +12,22 @@ class Condominio(models.Model):
 
     def __str__(self):
         return self.nome
+    
+    @property
+    def total_apartamentos(self):
+        return Apartamento.objects.filter(bloco__condominio=self).count()
+
+    @property
+    def total_aps_naturgy(self):
+        return Apartamento.objects.filter(naturgy=True, bloco__condominio=self).count()
+    
+    @property
+    def total_aps_2p6(self):
+        return Apartamento.objects.filter(ap_2p6=True, bloco__condominio=self).count()
+    
+    @property
+    def total_outros(self):
+        return Apartamento.objects.filter(naturgy=False, bloco__condominio=self).count()
 
 class Bloco(models.Model):
     condominio = models.ForeignKey('Condominio', on_delete=models.CASCADE, related_name='blocos')
@@ -56,6 +71,5 @@ class Apartamento(models.Model):
     naturgy = models.BooleanField(default=False)
     ap_2p6 = models.BooleanField(default=False)
     
-
     def __str__(self):
         return f"{self.bloco} - Apto {self.numero}"

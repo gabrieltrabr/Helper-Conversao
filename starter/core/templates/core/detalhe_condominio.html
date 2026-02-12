@@ -1,10 +1,67 @@
 {% extends 'core/base.html' %}
 
 {% block conteudo %}
+<style>
+    /* O Grid Dinâmico */
+    .grid-dinamico {
+        display: grid;
+        grid-template-columns: repeat(var(--colunas, 4), 1fr);
+        gap: 15px;
+    }
+
+    /* O Card do Apartamento */
+    .apto-card {
+        position: relative;
+        min-height: 100px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        transition: transform 0.2s;
+    }
+    
+    .apto-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    }
+
+    /* Bolinhas de Status */
+    .status-indicator {
+        position: absolute;
+        right: 8px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        /* border: 2px solid white; */
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .indicator-naturgy { top: 8px; background-color: #0d6efd; }
+    .indicator-ap26 { top: 24px; background-color: #d63384; }
+
+    @media (max-width: 768px) {
+        .grid-dinamico { grid-template-columns: repeat(3, 1fr) !important; }
+    }
+</style>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>{{ condominio.nome }}</h2>
+    
+    <span class="badge bg-success ms-1.5" style="font-size: 0.8em; vertical-align: middle;">
+            {{ condominio.total_apartamentos }} Unidades Total
+        </span>
+    <span class="badge bg-primary ms-1.5" style="font-size: 0.8em; vertical-align: middle;">
+            {{ condominio.total_aps_naturgy }} Clientes Naturgy
+        </span>
+    <span class="badge bg-danger ms-1.5" style="font-size: 0.8em; vertical-align: middle;">
+            {{ condominio.total_aps_2p6 }} Apartamentos 2.6
+        </span>
+    <span class="badge bg-secondary ms-1.5" style="font-size: 0.8em; vertical-align: middle;">
+            {{ condominio.total_outros }} Não-Naturgy
+        </span>
     <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-sm">Voltar</a>
 </div>
+<h4>{{ condominio.endereco }}</h4>
 
 {% for bloco in condominio.blocos.all %}
     <div class="card mb-4 border-0 shadow-sm">
@@ -12,22 +69,33 @@
             <h5 class="mb-0 text-primary">Bloco: {{ bloco.nome }}</h5>
         </div>
         <div class="card-body">
-            <div class="row g-2">
+            <div class="grid-dinamico" style="--colunas: {{ bloco.qtd_ap_por_andar|default:4 }};">
+                
                 {% for apto in bloco.apartamentos.all %}
-                    <div class="col-6 col-md-3 col-lg-2">
-                        <div class="border rounded p-3 text-center bg-white shadow-xs">
-                            <span class="fw-bold fs-5">{{ apto.numero }}</span>
-                            <hr class="my-2">
-                            <button class="btn btn-sm btn-light border w-100">
-                                <i class="bi bi-plus-lg"></i>
+                    <div class="border rounded bg-white shadow-sm apto-card">
+                        {% if apto.naturgy %}
+                            <div class="status-indicator indicator-naturgy" title="Naturgy"></div>
+                        {% endif %}
+                        
+                        {% if apto.ap_2p6 %}
+                            <div class="status-indicator indicator-ap26" title="AP 2.6"></div>
+                        {% endif %}
+
+                        <h4 class="mb-0 fw-bold text-dark">{{ apto.numero }}</h4>
+                        
+                        <div class="mt-3 w-100 px-3">
+                            <button class="btn btn-sm btn-light w-100 border text-muted">
+                                <i class="bi bi-cloud-upload"></i>
                             </button>
                         </div>
                     </div>
                 {% endfor %}
+
             </div>
         </div>
     </div>
 {% empty %}
     <p>Este condomínio ainda não possui blocos cadastrados.</p>
 {% endfor %}
+
 {% endblock %}
