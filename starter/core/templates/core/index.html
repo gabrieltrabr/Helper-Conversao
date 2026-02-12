@@ -26,7 +26,7 @@
                                     {{ condominio.data_fim|date:"d/m" }}
                                 </span>
                             {% endif %}
-                            <a href="#" class="btn btn-sm btn-outline-primary">Acessar</a>
+                            <a href="{% url 'detalhe_condominio' pk=condominio.pk %}" class="btn btn-sm btn-outline-primary">Acessar</a>
                         </div>
                     </div>
                 </div>
