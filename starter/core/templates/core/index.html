@@ -1,0 +1,40 @@
+{% extends 'core/base.html' %}
+
+{% block conteudo %}
+    <h2 class="mb-4">{{ titulo }}</h2>
+
+    <div class="row">
+        {% for condominio in condominios %}
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-buildings"></i> {{ condominio.nome }}
+                        </h5>
+                        <p class="card-text text-muted">
+                            {{ condominio.endereco|default:"Sem endereço cadastrado" }}
+                        </p>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-auto">
+                        <span class="badge bg-secondary">
+                            {{ condominio.blocos.count }} Blocos
+                        </span>
+
+                            {% if condominio.data_fim %}
+                                <span class="badge {% if condominio.data_fim < hoje %}bg-success{% else %}bg-warning{% endif %}">
+                                    <i class="bi bi-calendar-event me-1"></i>
+                                    {{ condominio.data_fim|date:"d/m" }}
+                                </span>
+                            {% endif %}
+                            <a href="#" class="btn btn-sm btn-outline-primary">Acessar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="alert alert-info">
+                Nenhum condomínio cadastrado ainda. Vá ao Admin para criar um.
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

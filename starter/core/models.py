@@ -5,6 +5,8 @@ class Condominio(models.Model):
     nome = models.CharField(max_length=100)
     endereco = models.CharField(max_length=255, blank=True)
     data_criacao = models.DateTimeField()
+    data_inicio = models.DateField(null=True, blank=True, verbose_name="Início do Serviço")
+    data_fim = models.DateField(null=True, blank=True, verbose_name="Fim do Serviço")
 
     qtd_andares_padrao = models.PositiveIntegerField(default=0, help_text="Padrão para os blocos deste condomínio")
     qtd_ap_por_andar_padrao = models.PositiveIntegerField(default=0, help_text="Padrão de aptos por andar")
@@ -45,8 +47,7 @@ class Bloco(models.Model):
                 objetos_apartamento.append(
                     Apartamento(bloco=self, numero=numero_ap)
                 )
-        
-        # Bulk Create: Salva todos de uma vez (muito mais eficiente)
+
         Apartamento.objects.bulk_create(objetos_apartamento, ignore_conflicts=True)
 
 class Apartamento(models.Model):
