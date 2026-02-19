@@ -2,14 +2,13 @@
 
 {% block conteudo %}
 <style>
-    /* O Grid Dinâmico */
+    /* Seus estilos originais preservados */
     .grid-dinamico {
         display: grid;
         grid-template-columns: repeat(var(--colunas, 4), 1fr);
         gap: 15px;
     }
 
-    /* O Card do Apartamento */
     .apto-card {
         position: relative;
         min-height: 100px;
@@ -25,77 +24,132 @@
         box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
     }
 
-    /* Bolinhas de Status */
     .status-indicator {
         position: absolute;
         right: 8px;
         width: 12px;
         height: 12px;
         border-radius: 50%;
-        /* border: 2px solid white; */
         box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
-
+    
     .indicator-naturgy { top: 8px; background-color: #0d6efd; }
-    .indicator-ap26 { top: 24px; background-color: #d63384; }
+    .indicator-ap_2p6 { top: 24px; background-color: #d63384; }
+    .indicator-os { top: 8px; background-color: #bb7924; } /* Verde Sucesso */
+    .indicator-video { top: 24px; background-color: #822caa; } /* Laranja */
+
+    .badge-os { background-color: #bb7924 !important; color: white; }
+    .badge-video { background-color: #822caa !important; color: white; }
 
     @media (max-width: 768px) {
         .grid-dinamico { grid-template-columns: repeat(3, 1fr) !important; }
     }
+
+    /* --- LÓGICA DO MODO EDIÇÃO (SEM JS) --- */
+    #toggle-edicao { display: none; }
+
+    /* Quando o checkbox estiver marcado, mude o estilo dos irmãos abaixo */
+    #toggle-edicao:checked ~ .cabecalho-acoes .btn-editar { display: none !important; }
+    #toggle-edicao:checked ~ .cabecalho-acoes .btn-salvar { display: inline-block !important; }
+    
+    #toggle-edicao:checked ~ .area-blocos .modo-upload { display: none !important; }
+    #toggle-edicao:checked ~ .area-blocos .modo-edicao { display: block !important; }
+
+    /* Esconde os indicadores de OS/Vídeo quando no Modo Edição */
+    #toggle-edicao:checked ~ .area-blocos .indicadores-upload { display: none !important; }
 </style>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>{{ condominio.nome }}</h2>
-    
-    <span class="badge bg-success ms-1.5" style="font-size: 0.8em; vertical-align: middle;">
-            {{ condominio.total_apartamentos }} Unidades Total
-        </span>
-    <span class="badge bg-primary ms-1.5" style="font-size: 0.8em; vertical-align: middle;">
-            {{ condominio.total_aps_naturgy }} Clientes Naturgy
-        </span>
-    <span class="badge bg-danger ms-1.5" style="font-size: 0.8em; vertical-align: middle;">
-            {{ condominio.total_aps_2p6 }} Apartamentos 2.6
-        </span>
-    <span class="badge bg-secondary ms-1.5" style="font-size: 0.8em; vertical-align: middle;">
-            {{ condominio.total_outros }} Não-Naturgy
-        </span>
-    <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-sm">Voltar</a>
-</div>
-<h4>{{ condominio.endereco }}</h4>
+<form method="POST" action="{% url 'detalhe_condominio' condominio.pk %}">
+    {% csrf_token %}
 
-{% for bloco in condominio.blocos.all %}
-    <div class="card mb-4 border-0 shadow-sm">
-        <div class="card-header bg-white">
-            <h5 class="mb-0 text-primary">Bloco: {{ bloco.nome }}</h5>
+    <input type="checkbox" id="toggle-edicao">
+
+    <div class="d-flex justify-content-between align-items-center mb-2 cabecalho-acoes">
+        <h2>{{ condominio.nome }}</h2>
+        
+        <div>
+            <span class="badge bg-secondary" style="font-size: 0.8em;">
+                {{ condominio.total_apartamentos }} Unidades
+            </span>
+            <span class="badge bg-success" style="font-size: 0.8em;">
+                {{ condominio.total_completos }}/{{ condominio.total_apartamentos }} Completos
+            </span>
+            <span class="badge badge-os" style="font-size: 0.8em;">
+                {{ condominio.total_os }}/{{ condominio.total_apartamentos }} OS
+            </span>
+            <span class="badge badge-video" style="font-size: 0.8em;">
+                {{ condominio.total_videos }}/{{ condominio.total_apartamentos }} Vídeos
+            </span>
         </div>
-        <div class="card-body">
-            <div class="grid-dinamico" style="--colunas: {{ bloco.qtd_ap_por_andar|default:4 }};">
-                
-                {% for apto in bloco.apartamentos.all %}
-                    <div class="border rounded bg-white shadow-sm apto-card">
-                        {% if apto.naturgy %}
-                            <div class="status-indicator indicator-naturgy" title="Naturgy"></div>
-                        {% endif %}
-                        
-                        {% if apto.ap_2p6 %}
-                            <div class="status-indicator indicator-ap26" title="AP 2.6"></div>
-                        {% endif %}
-
-                        <h4 class="mb-0 fw-bold text-dark">{{ apto.numero }}</h4>
-                        
-                        <div class="mt-3 w-100 px-3">
-                            <button class="btn btn-sm btn-light w-100 border text-muted">
-                                <i class="bi bi-cloud-upload"></i>
-                            </button>
-                        </div>
-                    </div>
-                {% endfor %}
-
-            </div>
+        
+        <div>
+            <label for="toggle-edicao" class="btn btn-warning btn-sm me-2 btn-editar mb-0" style="cursor: pointer;">
+                <i class="bi bi-pencil"></i> Modo Edição
+            </label>
+            
+            <button type="submit" class="btn btn-success btn-sm me-2 btn-salvar" style="display: none;">
+                <i class="bi bi-check-lg"></i> Salvar Alterações
+            </button>
+            
+            <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-sm">Voltar</a>
         </div>
     </div>
-{% empty %}
-    <p>Este condomínio ainda não possui blocos cadastrados.</p>
-{% endfor %}
+    
+    <h5 class="text-muted mb-4">{{ condominio.endereco }}</h5>
 
+    <div class="area-blocos">
+        {% for bloco in condominio.blocos.all %}
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 text-primary fw-bold">Bloco: {{ bloco.nome }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="grid-dinamico" style="--colunas: {{ bloco.qtd_ap_por_andar|default:4 }};">
+                        
+                        {% for apto in bloco.apartamentos.all %}
+                            <div class="border rounded bg-white shadow-sm apto-card">
+                                
+                                <div class="indicadores-upload">
+                                    {% if apto.arquivo_os %}
+                                        <div class="status-indicator indicator-os" title="OS Enviada"></div>
+                                    {% endif %}
+                                    
+                                    {% if apto.arquivo_video %}
+                                        <div class="status-indicator indicator-video" title="Vídeo Enviado"></div>
+                                    {% endif %}
+                                </div>
+
+                                <h4 class="mb-0 fw-bold text-dark">{{ apto.numero }}</h4>
+                            
+                                <div class="mt-3 w-100 px-3 pb-2">
+                                    <div class="modo-upload">
+                                        <button type="button" class="btn btn-sm btn-light w-100 border text-muted">
+                                            <i class="bi bi-cloud-upload"></i>
+                                        </button>
+                                    </div>
+
+                                    <div class="modo-edicao text-start" style="display: none;">
+                                        <div class="form-check" style="min-height: auto;">
+                                            <input type="checkbox" class="form-check-input" name="naturgy_{{ apto.id }}" 
+                                                   id="nat_{{ apto.id }}" {% if apto.naturgy %}checked{% endif %}>
+                                            <label class="form-check-label" style="font-size: 0.8rem;" for="nat_{{ apto.id }}">Naturgy</label>
+                                        </div>
+                                        <div class="form-check" style="min-height: auto;">
+                                            <input type="checkbox" class="form-check-input" name="ap_2p6_{{ apto.id }}" 
+                                                   id="ap_2p6_{{ apto.id }}" {% if apto.ap_2p6 %}checked{% endif %}>
+                                            <label class="form-check-label" style="font-size: 0.8rem;" for="ap_2p6_{{ apto.id }}">AP 2.6</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p>Este condomínio ainda não possui blocos cadastrados.</p>
+        {% endfor %}
+    </div>
+</form>
 {% endblock %}

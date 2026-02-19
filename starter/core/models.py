@@ -29,6 +29,24 @@ class Condominio(models.Model):
     def total_outros(self):
         return Apartamento.objects.filter(naturgy=False, bloco__condominio=self).count()
 
+    # NOVAS PROPRIEDADES DE CONTAGEM PARA AS BADGES
+    @property
+    def total_os(self):
+        from .models import Apartamento
+        # Conta os que NÃO estão com o arquivo de OS vazio
+        return Apartamento.objects.filter(bloco__condominio=self).exclude(arquivo_os='').count()
+
+    @property
+    def total_videos(self):
+        from .models import Apartamento
+        return Apartamento.objects.filter(bloco__condominio=self).exclude(arquivo_video='').count()
+
+    @property
+    def total_completos(self):
+        from .models import Apartamento
+        # Conta os que têm OS E Vídeo
+        return Apartamento.objects.filter(bloco__condominio=self).exclude(arquivo_os='').exclude(arquivo_video='').count()
+
 class Bloco(models.Model):
     condominio = models.ForeignKey('Condominio', on_delete=models.CASCADE, related_name='blocos')
     nome = models.CharField(max_length=50)
@@ -70,6 +88,11 @@ class Apartamento(models.Model):
     numero = models.CharField(max_length=10)
     naturgy = models.BooleanField(default=False)
     ap_2p6 = models.BooleanField(default=False)
+    arquivo_os = models.FileField(upload_to='os/', null=True, blank=True)
+    arquivo_video = models.FileField(upload_to='videos/', null=True, blank=True)
     
+    class Meta:
+        ordering = ['numero']
+
     def __str__(self):
         return f"{self.bloco} - Apto {self.numero}"
