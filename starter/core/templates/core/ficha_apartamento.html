@@ -1,0 +1,129 @@
+{% extends 'core/base.html' %}
+
+{% block conteudo %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Apartamento {{ apto.numero }}</h2>
+    <a href="{% url 'detalhe_condominio' apto.bloco.condominio.pk %}" class="btn btn-outline-secondary btn-sm">
+        Voltar para o Quadro
+    </a>
+</div>
+
+<h5 class="text-muted mb-4">{{ apto.bloco.condominio.nome }} - Bloco {{ apto.bloco.nome }}</h5>
+
+<div class="row">
+    <div class="col-md-7">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <h5 class="mb-3 text-primary"><i class="bi bi-person-lines-fill"></i> Dados do Serviço</h5>
+                    
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small mb-1">Morador</label>
+                            <input type="text" class="form-control" name="morador" value="{{ apto.morador }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small mb-1">Técnico</label>
+                            <input type="text" class="form-control" name="tecnico" value="{{ apto.tecnico }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-muted small mb-1">Equipamento(s)</label>
+                            <input type="text" class="form-control" name="equipamento" value="{{ apto.equipamento }}" placeholder="Ex: Fogão 4 bocas Brastemp">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-muted small mb-1">Observações</label>
+                            <textarea class="form-control" name="observacoes" rows="2">{{ apto.observacoes }}</textarea>
+                        </div>
+                    </div>
+
+                    <h5 class="mb-3 text-primary border-top pt-3"><i class="bi bi-cloud-arrow-up"></i> Anexar Arquivos</h5>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">1. Ordem de Serviço (Foto)</label>
+                        <input class="form-control form-control-sm" type="file" name="arquivo_os" accept="image/*,application/pdf">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">2. Vídeo da Conversão</label>
+                        <input class="form-control form-control-sm" type="file" name="arquivo_video" accept="video/*">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">3. Fotos Extras (Opcional)</label>
+                        <input class="form-control form-control-sm" type="file" name="arquivos_extras" accept="image/*" multiple>
+                    </div>
+
+                    <div class="mb-3 border-start border-info border-4 ps-3 bg-light py-2">
+                        <label class="form-label fw-bold text-info"><i class="bi bi-fan"></i> Exaustão Forçada</label>
+                        
+                        <div class="mb-2">
+                            <label class="form-label small">Ordem de Serviço (Exaustão)</label>
+                            <input class="form-control form-control-sm" type="file" name="arquivo_os_ex" accept="image/*,application/pdf">
+                        </div>
+                        
+                        <div>
+                            <label class="form-label small">Vídeo (Exaustão)</label>
+                            <input class="form-control form-control-sm" type="file" name="arquivo_video_ex" accept="video/*">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-save"></i> Salvar Ficha e Arquivos
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="card shadow-sm border-0 bg-light">
+            <div class="card-body">
+                <h5 class="mb-3"><i class="bi bi-folder2-open"></i> Arquivos Salvos</h5>
+                
+                {% if arquivos %}
+                    <ul class="list-group">
+                        {% for arquivo in arquivos %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    {% if arquivo.tipo == 'VIDEO' %}
+                                        <i class="bi bi-camera-video text-danger me-2"></i>
+                                    {% elif arquivo.tipo == 'OS' %}
+                                        <i class="bi bi-file-earmark-text text-primary me-2"></i>
+                                    {% else %}
+                                        <i class="bi bi-image text-success me-2"></i>
+                                    {% endif %}
+                                    
+                                    <a href="{{ arquivo.arquivo.url }}" target="_blank" class="text-decoration-none text-dark fw-bold">
+                                        {{ arquivo.get_tipo_display }}
+                                    </a>
+                                    
+                                    <small class="d-block text-muted" style="font-size: 0.65em; margin-left: 24px;">
+                                        {{ arquivo.arquivo.name }}
+                                    </small>
+                                </div>
+                                
+                                <div class="d-flex align-items-center">
+                                    <small class="text-muted me-3" style="font-size: 0.7em;">
+                                        {{ arquivo.data_envio|date:"d/m H:i" }}
+                                    </small>
+                                    
+                                    <form method="POST" action="{% url 'deletar_arquivo' arquivo.pk %}" class="m-0 p-0">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0 p-1" title="Apagar Arquivo">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted small">Nenhum arquivo enviado ainda.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
