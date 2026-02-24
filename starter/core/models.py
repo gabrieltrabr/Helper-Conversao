@@ -11,9 +11,28 @@ class Condominio(models.Model):
 
     qtd_andares_padrao = models.PositiveIntegerField(default=0, help_text="Padrão para os blocos deste condomínio")
     qtd_ap_por_andar_padrao = models.PositiveIntegerField(default=0, help_text="Padrão de aptos por andar")
-
+    qtd_saloes_festas = models.PositiveIntegerField(default=0, verbose_name="Qtd. Salões de Festas", help_text="Cria automaticamente um bloco de Áreas Comuns")
     def __str__(self):
         return self.nome
+    
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+
+        # Se for um condomínio novo e tiver salões de festas definidos
+        if is_new and self.qtd_saloes_festas > 0:
+            # 1. Cria um Bloco especial chamado "Áreas Comuns"
+            bloco_comum = self.blocos.create(
+                nome="Áreas Comuns",
+                qtd_andares=0, # Zero para não gerar apartamentos normais
+                qtd_ap_por_andar=0
+            )
+            
+            # 2. Cria os "Apartamentos" que na verdade são os salões
+            for i in range(1, self.qtd_saloes_festas + 1):
+                # Se for só 1, chama de "Salão de Festas", se for mais, numera (ex: Salão de Festas 2)
+                nome_salao = "Salão de Festas" if self.qtd_saloes_festas == 1 else f"Salão de Festas {i}"
+                bloco_comum.apartamentos.create(numero=nome_salao)
     
     @property
     def total_apartamentos(self):
