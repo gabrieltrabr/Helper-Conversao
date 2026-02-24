@@ -89,9 +89,6 @@
         </div>
         
         <div>
-            <label for="toggle-edicao" class="btn btn-warning btn-sm me-2 btn-editar mb-0" style="cursor: pointer;">
-                <i class="bi bi-pencil"></i> Modo Edição
-            </label>
             
             <button type="submit" class="btn btn-success btn-sm me-2 btn-salvar" style="display: none;">
                 <i class="bi bi-check-lg"></i> Salvar Alterações
@@ -100,6 +97,9 @@
             <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-sm">Voltar</a>
             <a href="{% url 'baixar_arquivos' condominio.pk %}" class="btn btn-outline-primary btn-sm me-2">
                 <i class="bi bi-file-earmark-zip"></i> Baixar Arquivos
+            </a>
+            <a href="{% url 'exportar_planilha' condominio.pk %}" class="btn btn-outline-success btn-sm me-2">
+                <i class="bi bi-file-earmark-excel"></i> Exportar Planilha
             </a>
         </div>
     </div>

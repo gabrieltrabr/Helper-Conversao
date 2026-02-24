@@ -4,6 +4,7 @@ from datetime import date
 import zipfile
 import os
 import io
+import openpyxl
 from django.http import HttpResponse
 
 def index(request):
@@ -148,4 +149,49 @@ def baixar_arquivos_condominio(request, pk):
     buffer.seek(0)
     response = HttpResponse(buffer, content_type='application/zip')
     response['Content-Disposition'] = f'attachment; filename="Arquivos_{condominio.nome}.zip"'
+    return response
+
+def exportar_planilha_condominio(request, pk):
+    condominio = get_object_or_404(Condominio, pk=pk)
+    
+    # 1. Cria o arquivo Excel na memória
+    wb = openpyxl.Workbook()
+    
+    # Para economizar consultas ao banco, buscamos todos os APs de uma vez só
+    apartamentos = Apartamento.objects.filter(bloco__condominio=condominio).select_related('bloco').order_by('bloco__nome', 'numero')
+
+    # ==========================================
+    # ABA 1: Listagem de Serviços (Comercial)
+    # ==========================================
+    ws1 = wb.active # Pega a primeira aba criada por padrão
+    ws1.title = "Serviços e Moradores"
+    
+    # Cabeçalhos da Aba 1
+    ws1.append(['Bloco', 'Apartamento', 'Morador', 'Técnico', 'Equipamento', 'Exaustão', 'Tem OS?', 'Tem Vídeo?', 'Observações'])
+    
+    # Preenchendo os dados da Aba 1
+    for apto in apartamentos:
+        # Lógica para checar se tem OS/Vídeo (normal ou de exaustão)
+        status_os = "Sim" if apto.tem_os or apto.tem_os_ex else "Não"
+        status_video = "Sim" if apto.tem_video or apto.tem_video_ex else "Não"
+        
+        ws1.append([
+            apto.bloco.nome,
+            apto.numero,
+            apto.morador,
+            apto.tecnico,
+            apto.equipamento,
+            "Sim" if apto.exaustao_forcada else "Não",
+            status_os,
+            status_video,
+            apto.observacoes
+        ])
+
+    # 2. Prepara a resposta HTTP para o navegador baixar o arquivo
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename="Relatorio_{condominio.nome}.xlsx"'
+    
+    # Salva o arquivo virtual direto na resposta
+    wb.save(response)
+    
     return response
