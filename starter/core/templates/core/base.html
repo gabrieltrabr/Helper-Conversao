@@ -74,7 +74,24 @@
                     <a href="{% url 'index' %}" class="nav-link active">Condomínios</a>
                 </li>
                 </ul>
+            <hr>
+            
+            <div class="d-flex align-items-center text-decoration-none">
+                <div class="w-100">
+                    <p class="mb-1 fw-bold text-white small"><i class="bi bi-person-circle me-1"></i> {{ user.username }}</p>
+                    
+                    <form method="POST" action="{% url 'logout' %}" class="m-0 p-0 w-100">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger w-100 mt-2 text-start">
+                            <i class="bi bi-box-arrow-left me-1"></i> Sair do Sistema
+                        </button>
+                    </form>
+                </div>
+            </div>
         </nav>
+        
+
+            
 
         <main class="flex-grow-1 p-4" style="max-height: 100vh; overflow-y: auto;">
             {% block conteudo %}

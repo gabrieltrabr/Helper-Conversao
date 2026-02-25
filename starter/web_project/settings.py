@@ -122,3 +122,9 @@ MEDIA_URL = '/media/'
 
 # Pasta real no seu computador/servidor onde os arquivos vão ficar
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Para onde ir depois de logar com sucesso (nossa página inicial)
+LOGIN_REDIRECT_URL = '/'
+
+# Para onde ir depois de clicar em "Sair"
+LOGOUT_REDIRECT_URL = '/login/'

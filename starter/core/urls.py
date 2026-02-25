@@ -2,9 +2,12 @@ from django.urls import path
 from . import views
 from django.conf import settings # Importar settings
 from django.conf.urls.static import static # Importar static
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     # Quando o usuário acessar vazio (''), chama a view 'index'
+    path('login/', auth_views.LoginView.as_view(template_name='core/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('', views.index, name='index'),
     path('condominio/<int:pk>/', views.detalhe_condominio, name='detalhe_condominio'),
     path('apartamento/<int:pk>/', views.ficha_apartamento, name='ficha_apartamento'),

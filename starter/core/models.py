@@ -1,6 +1,7 @@
 import os
 from django.db import models
 from django.utils.text import slugify
+from django.contrib.auth.models import User
 
 class Condominio(models.Model):
     nome = models.CharField(max_length=100)
@@ -8,7 +9,7 @@ class Condominio(models.Model):
     data_criacao = models.DateTimeField()
     data_inicio = models.DateField(null=True, blank=True, verbose_name="Início do Serviço")
     data_fim = models.DateField(null=True, blank=True, verbose_name="Fim do Serviço")
-
+    usuarios = models.ManyToManyField(User, blank=True, related_name='condominios', help_text="Usuários que podem ver TODOS os blocos deste condomínio.")
     qtd_andares_padrao = models.PositiveIntegerField(default=0, help_text="Padrão para os blocos deste condomínio")
     qtd_ap_por_andar_padrao = models.PositiveIntegerField(default=0, help_text="Padrão de aptos por andar")
     qtd_saloes_festas = models.PositiveIntegerField(default=0, verbose_name="Qtd. Salões de Festas", help_text="Cria automaticamente um bloco de Áreas Comuns")
@@ -85,7 +86,7 @@ class Bloco(models.Model):
     qtd_andares = models.PositiveIntegerField(null=True, blank=True, help_text="Quantos andares tem o prédio?")
     qtd_ap_por_andar = models.PositiveIntegerField(null=True, blank=True, help_text="Quantos apartamentos por andar?")
     inicio_numeracao = models.PositiveIntegerField(default=101, help_text="Qual é o primeiro apartamento? ex: 101")
-
+    usuarios = models.ManyToManyField(User, blank=True, related_name='blocos_atribuidos', help_text="Equipes/Usuários restritos apenas a este bloco.")
     def __str__(self):
         return f"{self.condominio.nome} - {self.nome}"
 

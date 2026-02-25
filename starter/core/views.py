@@ -6,25 +6,32 @@ import os
 import io
 import openpyxl
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 
+@login_required(login_url='/login/') # Se não estiver logado, chuta para a tela de login
 def index(request):
-    # 1. Buscar os dados no Banco
-    lista_condominios = Condominio.objects.all()
+    # Se for o chefão, vê tudo
+    if request.user.is_superuser:
+        condominios = Condominio.objects.all()
+    else:
+        # Pega condomínios onde ele foi alocado no condomínio OU em algum bloco específico dele
+        condominios = Condominio.objects.filter(
+            Q(usuarios=request.user) | Q(blocos__usuarios=request.user)
+        ).distinct() # distinct() evita que o condomínio apareça duplicado na lista
+        
+    return render(request, 'core/index.html', {'condominios': condominios})
 
-    # 2. Preparar o pacote de dados (Contexto)
-    contexto = {
-        'condominios': lista_condominios,
-        'titulo': 'Lista de Condomínios - Virada',
-        'hoje': date.today(),
-    }
-
-    # 3. Entregar o HTML (Template) preenchido
-    return render(request, 'core/index.html', contexto)
-
+@login_required(login_url='/login/')
 def detalhe_condominio(request, pk):
-    # 1. Busca o condomínio específico ou dá erro 404 (não encontrado)
+    # Pega o condomínio
     condominio = get_object_or_404(Condominio, pk=pk)
-    
+
+    # SEGURANÇA: Filtra quais blocos este usuário logado pode ver
+    if request.user.is_superuser or request.user in condominio.usuarios.all():
+        blocos_permitidos = condominio.blocos.all() # Vê todos
+    else:
+        blocos_permitidos = condominio.blocos.filter(usuarios=request.user) # Vê só os dele
     # 2. O Django já faz a mágica: como usamos 'related_name' no Model,
     # condominio.blocos.all() já traz todos os blocos deste condomínio.
     if request.method == 'POST':
@@ -42,6 +49,7 @@ def detalhe_condominio(request, pk):
         return redirect('detalhe_condominio', pk=condominio.pk)
     contexto = {
         'condominio': condominio,
+        'blocos_permitidos': blocos_permitidos, # Enviamos a lista filtrada pro HTML
     }
     return render(request, 'core/detalhe_condominio.html', contexto)
 
