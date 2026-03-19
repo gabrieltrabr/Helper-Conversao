@@ -1,0 +1,3 @@
+# backend/.env
+SECRET_KEY='YOUR DJANGO INSECURE KEY HERE'
+DEBUG=True
