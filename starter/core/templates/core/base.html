@@ -6,29 +6,25 @@
     transition: transform 0.3s ease-in-out;
 }
 
-/* Ocultar o checkbox mestre e o cabeçalho mobile no PC */
 #menu-toggle { display: none; }
 .cabecalho-mobile { display: none; }
 
-/* REGRAS APENAS PARA CELULARES E TABLETS (Telas menores que 768px) */
+/* Telas menores que 768px */
 @media (max-width: 767px) {
-    /* 1. Mostra o cabeçalho escuro com o botão de hambúrguer */
     .cabecalho-mobile {
         display: flex;
     }
 
-    /* 2. Arranca a sidebar do grid e esconde ela para a esquerda da tela */
     .minha-sidebar {
         position: fixed;
         top: 0;
         left: 0;
-        z-index: 1050; /* Garante que fique por cima de tudo */
-        transform: translateX(-100%); /* Joga 100% da largura para fora da tela */
+        z-index: 1050;
+        transform: translateX(-100%);
         background-color: white !important;
         box-shadow: 2px 0 8px rgba(0,0,0,0.2);
     }
 
-    /* 3. A MÁGICA: Se o checkbox for marcado, a sidebar volta pra posição 0 (desliza pra dentro) */
     #menu-toggle:checked ~ .wrapper-principal .minha-sidebar {
         transform: translateX(0);
     }
@@ -89,10 +85,7 @@
                 </div>
             </div>
         </nav>
-        
-
-            
-
+    
         <main class="flex-grow-1 p-4" style="max-height: 100vh; overflow-y: auto;">
             {% block conteudo %}
             {% endblock %}

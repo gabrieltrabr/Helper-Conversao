@@ -2,7 +2,6 @@
 
 {% block conteudo %}
 <style>
-    /* Seus estilos originais preservados */
     .grid-dinamico {
         display: grid;
         grid-template-columns: repeat(var(--colunas, 4), 1fr);
@@ -32,15 +31,14 @@
         box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
     
-    /* Naturgy e 2.6 na DIREITA */
+    /* Para função posterior (estrutura administrativa) */
     .indicator-naturgy { top: 8px; right: 8px; background-color: #0d6efd; }
     .indicator-ap_2p6 { top: 24px; right: 8px; background-color: #d63384; }
-    .indicator-exaustao { top: 40px; right: 8px; background-color: #0dcaf0; } /* Ciano no canto direito */
+    .indicator-exaustao { top: 40px; right: 8px; background-color: #0dcaf0; }
     
-    /* OS e Vídeo na ESQUERDA */
     .indicator-os { top: 8px; left: 8px; background-color: #e22d6a; } 
     .indicator-video { top: 24px; left: 8px; background-color: #822caa; }
-    .indicator-os-ex { top: 40px; left: 8px; background-color: #17a2b8; } /* Azul esverdeado na esquerda */
+    .indicator-os-ex { top: 40px; left: 8px; background-color: #17a2b8; }
 
     .badge-os { background-color: #e22d6a !important; color: white; }
     .badge-video { background-color: #822caa !important; color: white; }
@@ -49,7 +47,6 @@
         .grid-dinamico { grid-template-columns: repeat(3, 1fr) !important; }
     }
 
-    /* --- LÓGICA DO MODO EDIÇÃO (SEM JS) --- */
     #toggle-edicao { display: none; }
 
     #toggle-edicao:checked ~ .cabecalho-acoes .btn-editar { display: none !important; }
@@ -58,7 +55,6 @@
     #toggle-edicao:checked ~ .area-blocos .modo-upload { display: none !important; }
     #toggle-edicao:checked ~ .area-blocos .modo-edicao { display: block !important; }
 
-    /* Esconde os indicadores de OS/Vídeo quando no Modo Edição */
     #toggle-edicao:checked ~ .area-blocos .indicadores-upload { display: none !important; }
 </style>
 

@@ -20,18 +20,14 @@ class Condominio(models.Model):
         is_new = self.pk is None
         super().save(*args, **kwargs)
 
-        # Se for um condomínio novo e tiver salões de festas definidos
         if is_new and self.qtd_saloes_festas > 0:
-            # 1. Cria um Bloco especial chamado "Áreas Comuns"
             bloco_comum = self.blocos.create(
                 nome="Áreas Comuns",
-                qtd_andares=0, # Zero para não gerar apartamentos normais
+                qtd_andares=0,
                 qtd_ap_por_andar=0
             )
-            
-            # 2. Cria os "Apartamentos" que na verdade são os salões
+            # Salão de festas
             for i in range(1, self.qtd_saloes_festas + 1):
-                # Se for só 1, chama de "Salão de Festas", se for mais, numera (ex: Salão de Festas 2)
                 nome_salao = "Salão de Festas" if self.qtd_saloes_festas == 1 else f"Salão de Festas {i}"
                 bloco_comum.apartamentos.create(numero=nome_salao)
     
@@ -54,7 +50,6 @@ class Condominio(models.Model):
     @property
     def total_os(self):
         from .models import Apartamento
-        # Filtra pela relação (arquivos) e pelo tipo. Usa distinct() para não contar o mesmo AP duas vezes
         return Apartamento.objects.filter(bloco__condominio=self, arquivos__tipo='OS').distinct().count()
 
     @property
@@ -65,7 +60,6 @@ class Condominio(models.Model):
     @property
     def total_completos(self):
         from .models import Apartamento
-        # Aqui fazemos um "AND" (E): Tem arquivo OS E tem arquivo VIDEO
         return Apartamento.objects.filter(
             bloco__condominio=self, arquivos__tipo='OS'
         ).filter(arquivos__tipo='VIDEO').distinct().count()
@@ -73,7 +67,6 @@ class Condominio(models.Model):
     @property
     def total_exaustao(self):
         from .models import Apartamento
-        # Conta apartamentos distintos que têm OS ou Vídeo de exaustão
         return Apartamento.objects.filter(
             bloco__condominio=self, 
             arquivos__tipo__in=['OS_EX', 'VIDEO_EX']
@@ -105,10 +98,8 @@ class Bloco(models.Model):
         
         for andar in range(1, andares + 1):
             for ap in range(1, aps_por_andar + 1):
-                # Formatação: Ex: Andar 1, Ap 1 -> 101. Andar 12, Ap 4 -> 1204
                 numero_ap = f"{andar}{ap:02d}" 
                 
-                # Prepara o objeto, mas não salva ainda (mais rápido)
                 objetos_apartamento.append(
                     Apartamento(bloco=self, numero=numero_ap)
                 )
@@ -128,17 +119,14 @@ class Apartamento(models.Model):
     
     @property
     def tem_os(self):
-        # Retorna True se existir pelo menos 1 arquivo do tipo OS
         return self.arquivos.filter(tipo='OS').exists()
 
     @property
     def tem_video(self):
-        # Retorna True se existir pelo menos 1 arquivo do tipo VIDEO
         return self.arquivos.filter(tipo='VIDEO').exists()
 
     exaustao_forcada = models.BooleanField(default=False)
 
-    # 2. Adicione os atalhos lá no final da classe Apartamento:
     @property
     def tem_os_ex(self):
         return self.arquivos.filter(tipo='OS_EX').exists()
@@ -147,7 +135,6 @@ class Apartamento(models.Model):
     def tem_video_ex(self):
         return self.arquivos.filter(tipo='VIDEO_EX').exists()
 
-    # Vamos atualizar a inteligência do alerta de pendência para incluir a exaustão
     @property
     def pendente_parcial(self):
         pendencia_padrao = (self.tem_os and not self.tem_video) or (self.tem_video and not self.tem_os)
@@ -165,19 +152,14 @@ def caminho_arquivo_personalizado(instance, filename):
     # Pega a extensão original (.pdf, .mp4, .jpg)
     extensao = os.path.splitext(filename)[1].lower()
     
-    # Pega os dados do relacionamento
     apto = instance.apartamento
     bloco = apto.bloco
     cond = bloco.condominio
     
     # slugify limpa espaços e caracteres estranhos. Ex: "Bloco A" vira "bloco-a"
     nome_bloco = slugify(bloco.nome).upper()
-    
-    # Monta o nome: BLOCO-APTO-TIPO-C{ID_CONDOMINIO}.ext
-    # Ex: A-101-OS-C5.pdf  ou  BLOCO-B-204-VIDEO-C5.mp4
     novo_nome = f"{nome_bloco}-{apto.numero}-{instance.tipo}-C{cond.id}{extensao}"
     
-    # Salva organizando em pastas separadas por condomínio
     return f"uploads/condominio_{cond.id}/{novo_nome}"
 
 class ArquivoApartamento(models.Model):
@@ -188,7 +170,6 @@ class ArquivoApartamento(models.Model):
         ('OS_EX', 'OS Exaustão'),
     ]
     
-    # A ligação mágica: O arquivo "sabe" a qual apartamento ele pertence
     apartamento = models.ForeignKey(Apartamento, on_delete=models.CASCADE, related_name='arquivos')
     
     arquivo = models.FileField(upload_to=caminho_arquivo_personalizado)

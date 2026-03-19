@@ -5,7 +5,6 @@ from django.conf.urls.static import static # Importar static
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-    # Quando o usuário acessar vazio (''), chama a view 'index'
     path('login/', auth_views.LoginView.as_view(template_name='core/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('', views.index, name='index'),
@@ -16,6 +15,5 @@ urlpatterns = [
     path('condominio/<int:pk>/exportar-planilha/', views.exportar_planilha_condominio, name='exportar_planilha'),
 ]
 
-# Adicione isto no final: permite ver os arquivos salvos enquanto estiver testando no PC
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
