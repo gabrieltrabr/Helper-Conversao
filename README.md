@@ -12,9 +12,9 @@ Interface web para prestação de serviços em condomínios. A interface permite
 
 *(Add your screenshots here! Create a `docs/images/` folder in your repo, drop the images in, and update these links.)*
 
-| Dashboard | Mobile View | Data Visualization |
+| Dashboard | Structure View | Details |
 | :---: | :---: | :---: |
-| <img src="docs/images/dashboard.png" width="250"/> | <img src="docs/images/mobile.png" width="250"/> | <img src="docs/images/charts.png" width="250"/> |
+| <img src="docs/images/dashboard.png" width="250"/> | <img src="docs/images/charts.png" width="250"/> | <img src="docs/images/details.png" width="250"/> |
 
 ## ✨ Key Features
 
